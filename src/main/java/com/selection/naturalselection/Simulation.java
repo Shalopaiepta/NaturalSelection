@@ -1,5 +1,5 @@
 package com.selection.naturalselection;
-
+import javafx.scene.paint.Color;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -7,6 +7,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -54,9 +55,11 @@ public class Simulation extends Application {
     }
 
     private void updateSimulation() {
-        for (Animal animal : animals) {
+        Iterator<Animal> iterator = animals.iterator();
+        while (iterator.hasNext()) {
+            Animal animal = iterator.next();
             if (animal.getEnergy() > 0) {
-                // Поиск ближайшей пищи
+                // Поиск ближайшей пищи и обработка перемещения к ней
                 Food closestFood = null;
                 double closestDistance = Double.MAX_VALUE;
                 for (Food food : foods) {
@@ -71,7 +74,7 @@ public class Simulation extends Application {
                 if (closestFood != null) {
                     animal.moveTowards(closestFood);
                     if (animal.isFoodFound(closestFood)) {
-                        animal.setEnergy(animal.getEnergy() +10 );  // Животное получает энергию
+                        animal.setEnergy(animal.getEnergy() + 10);  // Животное получает энергию
                         animal.incrementFoodCount(this); // Увеличиваем счетчик пищи
 
                         // Удаление пищи
@@ -81,6 +84,14 @@ public class Simulation extends Application {
                         animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
                     }
                 }
+            } else {
+                // Животное умирает и превращается в единицу пищи
+                Food newFood = new Food(animal.getX(), animal.getY());
+                newFood.setColor(Color.BLACK);  // Устанавливаем цвет пищи черным
+                foods.add(newFood);
+                root.getChildren().add(newFood);
+                iterator.remove();  // Удаляем умершее животное из списка
+                root.getChildren().remove(animal);
             }
         }
 
@@ -123,3 +134,4 @@ public class Simulation extends Application {
         launch(args);
     }
 }
+
