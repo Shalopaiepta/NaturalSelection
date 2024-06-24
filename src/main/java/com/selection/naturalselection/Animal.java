@@ -8,18 +8,22 @@ import java.util.Random;
 
 public class Animal extends ImageView {
     private double energy;
+    private double size;
+    private double minsize;
+    private double maxsize;
     private double speed;
     private double maxspeed;
     private double minspeed;
     private double interactionRadius;
     private double maxInteractionRadius;
     private double minInteractionRadius;
-    private static final double ANIMAL_SIZE = 20;
     private static final Random random = new Random();
     private int foodCount = 0;
+    private Simulation simulation;
 
-    public Animal(double x, double y, double energy) {
+    public Animal(double x, double y, double energy, Simulation simulation) {
         super(new Image(Animal.class.getResourceAsStream("/com/selection/naturalselection/spore.png"))); // Путь к твоему изображению
+        this.simulation = simulation;
         this.setX(x);
         this.setY(y);
         this.energy = energy;
@@ -27,15 +31,15 @@ public class Animal extends ImageView {
         this.speed = 0.5 + random.nextDouble();
         this.maxspeed = this.speed * 3;
         this.minspeed = this.speed / 3;
+        this.size = 20 + random.nextDouble();
+        this.maxsize = this.size * 3;
+        this.minsize = this.size / 3;
 
         this.interactionRadius = 15 + random.nextInt(5);
         this.maxInteractionRadius = this.interactionRadius * 2;
         this.minInteractionRadius = this.interactionRadius / 2;
 
-        this.setFitWidth(ANIMAL_SIZE); // Установка ширины изображения
-        this.setFitHeight(ANIMAL_SIZE); // Установка высоты изображения
-        this.setPreserveRatio(true); // Сохранение пропорций изображения
-
+        updateImageSize();
         // Применение случайного цвета
         applyRandomColor();
     }
@@ -57,7 +61,7 @@ public class Animal extends ImageView {
     }
 
     public double getSpeed() {
-        return speed;
+        return speed / Math.sqrt(size / 10); // Новая формула штрафа к скорости
     }
 
     public double getMaxSpeed() {
@@ -66,6 +70,18 @@ public class Animal extends ImageView {
 
     public double getMinSpeed() {
         return minspeed;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public double getMaxSize() {
+        return maxsize;
+    }
+
+    public double getMinSize() {
+        return minsize;
     }
 
     public double getInteractionRadius() {
@@ -82,6 +98,19 @@ public class Animal extends ImageView {
 
     public void setEnergy(double energy) {
         this.energy = energy;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+        updateImageSize();
+    }
+
+    public void setMaxSize(double maxsize) {
+        this.maxsize = maxsize;
+    }
+
+    public void setMinSize(double minsize) {
+        this.minsize = minsize;
     }
 
     public void setSpeed(double speed) {
@@ -138,34 +167,49 @@ public class Animal extends ImageView {
         double dy = this.getY() - other.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < ANIMAL_SIZE) {
-            double overlap = ANIMAL_SIZE - distance;
+        if (distance < size) {
+            double overlap = size - distance;
             this.setX(this.getX() + dx / distance * overlap / 2);
             this.setY(this.getY() + dy / distance * overlap / 2);
             other.setX(other.getX() - dx / distance * overlap / 2);
             other.setY(other.getY() - dy / distance * overlap / 2);
         }
+
+        // Новая логика: если одно животное больше другого на 40%, оно съедает более мелкое животное
+        if (this.size >= other.size * 1.4) {
+            this.energy += other.energy; // Поглощаем энергию съеденного животного
+            simulation.removeAnimal(other);
+        } else if (other.size >= this.size * 1.4) {
+            other.energy += this.energy; // Поглощаем энергию съеденного животного
+            simulation.removeAnimal(this);
+        }
     }
 
-    public void incrementFoodCount(Simulation simulation) {
+    public void incrementFoodCount() {
         foodCount++;
 
         if (foodCount >= 3) {
             // Создание нового животного такого же цвета
-            Animal newAnimal = new Animal(this.getX(), this.getY(), 10);
+            Animal newAnimal = new Animal(this.getX(), this.getY(), 10, simulation);
             newAnimal.setEffect(this.getEffect());
 
             // Шанс изменения скорости нового животного
-            if (random.nextDouble() < 0.75) { // Например, 75% шанс
-                newAnimal.setSpeed(Math.min(this.getSpeed() * 1.7, maxspeed));
+            if (random.nextDouble() < 0.60) { // Например, 50% шанс
+                newAnimal.setSpeed(Math.min(this.getSpeed() * 1.2, maxspeed));
             } else {
                 // Уменьшаем скорость на 20%, но не менее чем на минимальное значение
                 newAnimal.setSpeed(Math.max(this.getSpeed() * 0.8, minspeed));
             }
 
+            if (random.nextDouble() < 0.60) { // Например, 50% шанс
+                newAnimal.setSize(Math.min(this.getSize() * 1.5, maxsize));
+            } else {
+                newAnimal.setSize(Math.max(this.getSize() * 0.8, minsize));
+            }
+
             // Шанс изменения радиуса взаимодействия нового животного
-            if (random.nextDouble() < 0.75) { // 75% шанс
-                newAnimal.setInteractionRadius(Math.min(this.getInteractionRadius() * 1.5, maxInteractionRadius));
+            if (random.nextDouble() < 0.60) { // 50% шанс
+                newAnimal.setInteractionRadius(Math.min(this.getInteractionRadius() * 1.2, maxInteractionRadius));
             } else {
                 // Уменьшаем радиус взаимодействия на 20%, но не менее чем на минимальное значение
                 newAnimal.setInteractionRadius(Math.max(this.getInteractionRadius() * 0.8, minInteractionRadius));
@@ -174,5 +218,10 @@ public class Animal extends ImageView {
             simulation.addAnimal(newAnimal);
             foodCount = 0; // Сбрасываем счетчик пищи
         }
+    }
+
+    private void updateImageSize() {
+        this.setFitWidth(size);
+        this.setFitHeight(size);
     }
 }

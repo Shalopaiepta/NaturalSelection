@@ -1,4 +1,5 @@
 package com.selection.naturalselection;
+
 import javafx.scene.paint.Color;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -21,7 +22,7 @@ public class Simulation extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        initializeAnimals(1);  // Инициализация 10 животных
+        initializeAnimals(5);  // Инициализация 5 животных
         spawnFood(20);  // Спаун 20 единиц пищи
 
         Scene scene = new Scene(root, 800, 600);
@@ -40,7 +41,7 @@ public class Simulation extends Application {
 
     private void initializeAnimals(int count) {
         for (int i = 0; i < count; i++) {
-            Animal animal = new Animal(random.nextDouble() * 800, random.nextDouble() * 600, 10);
+            Animal animal = new Animal(random.nextDouble() * 800, random.nextDouble() * 600, 10, this);
             animals.add(animal);
             root.getChildren().add(animal);
         }
@@ -75,7 +76,7 @@ public class Simulation extends Application {
                     animal.moveTowards(closestFood);
                     if (animal.isFoodFound(closestFood)) {
                         animal.setEnergy(animal.getEnergy() + 10);  // Животное получает энергию
-                        animal.incrementFoodCount(this); // Увеличиваем счетчик пищи
+                        animal.incrementFoodCount(); // Увеличиваем счетчик пищи
 
                         // Удаление пищи
                         foods.remove(closestFood);
@@ -130,8 +131,12 @@ public class Simulation extends Application {
         newAnimals.add(animal);
     }
 
+    public void removeAnimal(Animal animal) {
+        animals.remove(animal);
+        root.getChildren().remove(animal);
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
 }
-
