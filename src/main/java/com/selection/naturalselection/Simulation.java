@@ -20,12 +20,16 @@ public class Simulation extends Application {
     private Random random = new Random();
     private Pane root = new Pane();
 
+    private static final double SCREEN_WIDTH = 800;
+    private static final double SCREEN_HEIGHT = 600;
+    private static final double BORDER_MARGIN = 50; // Маржа от границы экрана, внутри которой еда не будет спавниться
+
     @Override
     public void start(Stage primaryStage) {
-        initializeAnimals(5);  // Инициализация 5 животных
+        initializeAnimals(10);  // Инициализация 10 животных
         spawnFood(20);  // Спаун 20 единиц пищи
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
         primaryStage.setTitle("Natural Selection Simulation");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -41,7 +45,7 @@ public class Simulation extends Application {
 
     private void initializeAnimals(int count) {
         for (int i = 0; i < count; i++) {
-            Animal animal = new Animal(random.nextDouble() * 800, random.nextDouble() * 600, 10, this);
+            Animal animal = new Animal(random.nextDouble() * SCREEN_WIDTH, random.nextDouble() * SCREEN_HEIGHT, 10, this);
             animals.add(animal);
             root.getChildren().add(animal);
         }
@@ -49,7 +53,9 @@ public class Simulation extends Application {
 
     private void spawnFood(int count) {
         for (int i = 0; i < count; i++) {
-            Food food = new Food(random.nextDouble() * 800, random.nextDouble() * 600);
+            double x = BORDER_MARGIN + random.nextDouble() * (SCREEN_WIDTH - 2 * BORDER_MARGIN);
+            double y = BORDER_MARGIN + random.nextDouble() * (SCREEN_HEIGHT - 2 * BORDER_MARGIN);
+            Food food = new Food(x, y);
             foods.add(food);
             root.getChildren().add(food);
         }
@@ -60,13 +66,13 @@ public class Simulation extends Application {
         while (iterator.hasNext()) {
             Animal animal = iterator.next();
             if (animal.getEnergy() > 0) {
-                // Поиск ближайшей пищи и обработка перемещения к ней
+                // Поиск пищи в пределах радиуса взаимодействия
                 Food closestFood = null;
                 double closestDistance = Double.MAX_VALUE;
                 for (Food food : foods) {
                     double distance = Math.sqrt(Math.pow(animal.getX() - food.getCenterX(), 2) +
                             Math.pow(animal.getY() - food.getCenterY(), 2));
-                    if (distance < closestDistance) {
+                    if (distance < animal.getInteractionRadius() && distance < closestDistance) {
                         closestDistance = distance;
                         closestFood = food;
                     }
@@ -74,7 +80,7 @@ public class Simulation extends Application {
 
                 if (closestFood != null) {
                     animal.moveTowards(closestFood);
-                    if (animal.isFoodFound(closestFood)) {
+                    if (animal.isInContactWithFood(closestFood)) {
                         animal.setEnergy(animal.getEnergy() + 10);  // Животное получает энергию
                         animal.incrementFoodCount(); // Увеличиваем счетчик пищи
 
@@ -84,6 +90,9 @@ public class Simulation extends Application {
                     } else {
                         animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
                     }
+                } else {
+                    animal.moveRandomly();
+                    animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
                 }
             } else {
                 // Животное умирает и превращается в единицу пищи
@@ -134,6 +143,10 @@ public class Simulation extends Application {
     public void removeAnimal(Animal animal) {
         animals.remove(animal);
         root.getChildren().remove(animal);
+    }
+
+    public List<Animal> getAnimals() {
+        return animals;
     }
 
     public static void main(String[] args) {

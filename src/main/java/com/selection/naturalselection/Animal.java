@@ -4,6 +4,7 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.List;
 import java.util.Random;
 
 public class Animal extends ImageView {
@@ -21,6 +22,11 @@ public class Animal extends ImageView {
     private int foodCount = 0;
     private Simulation simulation;
 
+    // Новые поля для случайного движения
+    private double moveDirectionX;
+    private double moveDirectionY;
+    private int moveTicks = 0;
+
     public Animal(double x, double y, double energy, Simulation simulation) {
         super(new Image(Animal.class.getResourceAsStream("/com/selection/naturalselection/spore.png"))); // Путь к твоему изображению
         this.simulation = simulation;
@@ -35,13 +41,15 @@ public class Animal extends ImageView {
         this.maxsize = this.size * 3;
         this.minsize = this.size / 3;
 
-        this.interactionRadius = 15 + random.nextInt(5);
+        this.interactionRadius = 100 + random.nextInt(5);
         this.maxInteractionRadius = this.interactionRadius * 2;
         this.minInteractionRadius = this.interactionRadius / 2;
 
         updateImageSize();
         // Применение случайного цвета
         applyRandomColor();
+        // Инициализация случайного направления движения
+        setRandomDirection();
     }
 
     private void applyRandomColor() {
@@ -137,91 +145,151 @@ public class Animal extends ImageView {
         this.minInteractionRadius = minInteractionRadius;
     }
 
+    public void incrementFoodCount() {
+        foodCount++;
+        if (foodCount >= 2) {
+            reproduce();
+            foodCount = 0; // Сбросить счетчик после размножения
+        }
+    }
+
     public void moveTowards(Food food) {
-        // Реализация движения к пище
         double dx = food.getCenterX() - this.getX();
         double dy = food.getCenterY() - this.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 1) {
-            this.setX(this.getX() + dx / distance * speed);
-            this.setY(this.getY() + dy / distance * speed);
+            dx /= distance;
+            dy /= distance;
+            this.setX(this.getX() + dx * getSpeed());
+            this.setY(this.getY() + dy * getSpeed());
         }
     }
 
-    public boolean isFoodFound(Food food) {
-        // Проверка, достигло ли животное пищи
-        double dx = food.getCenterX() - this.getX();
-        double dy = food.getCenterY() - this.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        return distance <= interactionRadius;
-    }
-
-    public boolean isColliding(Animal other) {
-        return this.getBoundsInParent().intersects(other.getBoundsInParent());
-    }
-
-    public void resolveCollision(Animal other) {
-        double dx = this.getX() - other.getX();
-        double dy = this.getY() - other.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < size) {
-            double overlap = size - distance;
-            this.setX(this.getX() + dx / distance * overlap / 2);
-            this.setY(this.getY() + dy / distance * overlap / 2);
-            other.setX(other.getX() - dx / distance * overlap / 2);
-            other.setY(other.getY() - dy / distance * overlap / 2);
+    public void moveRandomly() {
+        if (moveTicks <= 0 || isAtEdge()) {
+            setRandomDirection();
         }
 
-        // Новая логика: если одно животное больше другого на 40%, оно съедает более мелкое животное
-        if (this.size >= other.size * 1.4) {
-            this.energy += other.energy; // Поглощаем энергию съеденного животного
-            simulation.removeAnimal(other);
-        } else if (other.size >= this.size * 1.4) {
-            other.energy += this.energy; // Поглощаем энергию съеденного животного
-            simulation.removeAnimal(this);
-        }
-    }
+        double newX = this.getX() + moveDirectionX * getSpeed();
+        double newY = this.getY() + moveDirectionY * getSpeed();
 
-    public void incrementFoodCount() {
-        foodCount++;
-
-        if (foodCount >= 3) {
-            // Создание нового животного такого же цвета
-            Animal newAnimal = new Animal(this.getX(), this.getY(), 10, simulation);
-            newAnimal.setEffect(this.getEffect());
-
-            // Шанс изменения скорости нового животного
-            if (random.nextDouble() < 0.60) { // Например, 50% шанс
-                newAnimal.setSpeed(Math.min(this.getSpeed() * 1.2, maxspeed));
-            } else {
-                // Уменьшаем скорость на 20%, но не менее чем на минимальное значение
-                newAnimal.setSpeed(Math.max(this.getSpeed() * 0.8, minspeed));
+        // Проверка на коллизии с другими животными
+        List<Animal> animals = simulation.getAnimals();
+        for (Animal other : animals) {
+            if (other != this && isColliding(newX, newY, other)) {
+                // Если текущее животное больше другого достаточно, чтобы съесть его, продолжить движение
+                if (this.size > other.size * 1.4) {
+                    continue;
+                }
+                // Иначе изменить направление
+                setRandomDirection();
+                return;
             }
-
-            if (random.nextDouble() < 0.60) { // Например, 50% шанс
-                newAnimal.setSize(Math.min(this.getSize() * 1.5, maxsize));
-            } else {
-                newAnimal.setSize(Math.max(this.getSize() * 0.8, minsize));
-            }
-
-            // Шанс изменения радиуса взаимодействия нового животного
-            if (random.nextDouble() < 0.60) { // 50% шанс
-                newAnimal.setInteractionRadius(Math.min(this.getInteractionRadius() * 1.2, maxInteractionRadius));
-            } else {
-                // Уменьшаем радиус взаимодействия на 20%, но не менее чем на минимальное значение
-                newAnimal.setInteractionRadius(Math.max(this.getInteractionRadius() * 0.8, minInteractionRadius));
-            }
-
-            simulation.addAnimal(newAnimal);
-            foodCount = 0; // Сбрасываем счетчик пищи
         }
+
+        this.setX(newX);
+        this.setY(newY);
+        moveTicks--;
+    }
+
+    private boolean isAtEdge() {
+        double x = this.getX();
+        double y = this.getY();
+        return x <= 0 || x >= 800 - size || y <= 0 || y >= 600 - size;
+    }
+
+    private void setRandomDirection() {
+        double angle;
+        if (isAtEdge()) {
+            angle = calculateBounceAngle();
+        } else {
+            angle = random.nextDouble() * 2 * Math.PI; // Случайный угол в радианах
+        }
+        moveDirectionX = Math.cos(angle);
+        moveDirectionY = Math.sin(angle);
+        moveTicks = 100 + random.nextInt(100); // Количество тиков, в течение которых животное движется в этом направлении
+    }
+
+    private double calculateBounceAngle() {
+        double x = this.getX();
+        double y = this.getY();
+        double angle = random.nextDouble() * Math.PI; // Полукруг (180 градусов) для отклонения от границы
+
+        if (x <= 0 || x >= 800 - size) { // Левый или правый край
+            moveDirectionX = -moveDirectionX; // Изменить направление по X
+            return Math.atan2(moveDirectionY, moveDirectionX);
+        }
+        if (y <= 0 || y >= 600 - size) { // Верхний или нижний край
+            moveDirectionY = -moveDirectionY; // Изменить направление по Y
+            return Math.atan2(moveDirectionY, moveDirectionX);
+        }
+        return angle; // Вернуть случайный угол, если не было изменения направления
     }
 
     private void updateImageSize() {
         this.setFitWidth(size);
         this.setFitHeight(size);
+    }
+
+    public boolean isInContactWithFood(Food food) {
+        double dx = food.getCenterX() - this.getX();
+        double dy = food.getCenterY() - this.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.size / 2;
+    }
+
+    public boolean isColliding(Animal other) {
+        double dx = other.getX() - this.getX();
+        double dy = other.getY() - this.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < (this.size + other.size) / 2;
+    }
+
+    private boolean isColliding(double newX, double newY, Animal other) {
+        double dx = other.getX() - newX;
+        double dy = other.getY() - newY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < (this.size + other.size) / 2;
+    }
+
+    public void resolveCollision(Animal other) {
+        if (this.size > other.size * 1.4) { // Животное должно быть как минимум на 40% больше другого
+            this.energy += other.energy * 0.5; // Животное получает 50% энергии другого животного
+            simulation.removeAnimal(other); // Удаляем другое животное из симуляции
+        } else if (other.size > this.size * 1.4) {
+            other.energy += this.energy * 0.5;
+            simulation.removeAnimal(this);
+        } else {
+            // Отталкивание при коллизии
+            double dx = this.getX() - other.getX();
+            double dy = this.getY() - other.getY();
+            double distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance == 0) {
+                // Избегаем деления на ноль
+                distance = 0.01;
+            }
+            dx /= distance;
+            dy /= distance;
+            double overlap = (this.size + other.size) / 2 - distance;
+            this.setX(this.getX() + dx * overlap / 2);
+            this.setY(this.getY() + dy * overlap / 2);
+            other.setX(other.getX() - dx * overlap / 2);
+            other.setY(other.getY() - dy * overlap / 2);
+        }
+    }
+
+            private void reproduce() {
+        double newSpeed = this.speed * (0.9 + random.nextDouble() * 0.2); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
+        double newSize = this.size * (0.9 + random.nextDouble() * 0.2); // Новый животное получает размер в диапазоне от 90% до 110% от родительской
+        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.2); // Новый животное получает радиус в диапазоне от 90% до 110% от родительского
+
+        Animal newAnimal = new Animal(this.getX(), this.getY(), this.energy / 2, simulation);
+        newAnimal.setSpeed(newSpeed);
+        newAnimal.setSize(newSize);
+        newAnimal.setInteractionRadius(newInteractionRadius);
+        newAnimal.setEffect(this.getEffect()); // Наследование цвета родительского животного
+
+        simulation.addAnimal(newAnimal);
     }
 }
