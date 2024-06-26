@@ -10,7 +10,7 @@ module com.selection.naturalselection {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
-
+    requires javafx.media;
     opens com.selection.naturalselection to javafx.fxml;
     exports com.selection.naturalselection;
 }

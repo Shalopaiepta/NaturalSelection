@@ -1,12 +1,21 @@
 package com.selection.naturalselection;
 
-import javafx.scene.paint.Color;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +35,10 @@ public class Simulation extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        // Установка фото-фона
+        ImageView background = createBackground("C:\\Users\\Lenovo\\IdeaProjects\\NaturalSelection\\NaturalSelection\\src\\main\\resources\\com\\selection\\naturalselection\\fon.png");
+        root.getChildren().add(background);
+
         initializeAnimals(10);  // Инициализация 10 животных
         spawnFood(20);  // Спаун 20 единиц пищи
 
@@ -41,11 +54,25 @@ public class Simulation extends Application {
             }
         };
         timer.start();
+
+        // Таймер для спауна 15 единиц пищи каждые 20 секунд
+        Timeline foodSpawnTimer = new Timeline(new KeyFrame(Duration.seconds(20), event -> spawnFood(15)));
+        foodSpawnTimer.setCycleCount(Timeline.INDEFINITE);
+        foodSpawnTimer.play();
+    }
+
+    private ImageView createBackground(String path) {
+        Image image = new Image(new File(path).toURI().toString());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(SCREEN_WIDTH);
+        imageView.setFitHeight(SCREEN_HEIGHT);
+        imageView.setPreserveRatio(false);
+        return imageView;
     }
 
     private void initializeAnimals(int count) {
         for (int i = 0; i < count; i++) {
-            Animal animal = new Animal(random.nextDouble() * SCREEN_WIDTH, random.nextDouble() * SCREEN_HEIGHT, 10, this);
+            Animal animal = new Animal(random.nextDouble() * SCREEN_WIDTH, random.nextDouble() * SCREEN_HEIGHT, 20, this);
             animals.add(animal);
             root.getChildren().add(animal);
         }
@@ -62,6 +89,9 @@ public class Simulation extends Application {
     }
 
     private void updateSimulation() {
+        List<Animal> animalsToRemove = new ArrayList<>();
+        List<Animal> animalsToAdd = new ArrayList<>();
+
         Iterator<Animal> iterator = animals.iterator();
         while (iterator.hasNext()) {
             Animal animal = iterator.next();
@@ -81,7 +111,7 @@ public class Simulation extends Application {
                 if (closestFood != null) {
                     animal.moveTowards(closestFood);
                     if (animal.isInContactWithFood(closestFood)) {
-                        animal.setEnergy(animal.getEnergy() + 10);  // Животное получает энергию
+                        animal.setEnergy(animal.getEnergy() + 30);  // Животное получает энергию
                         animal.incrementFoodCount(); // Увеличиваем счетчик пищи
 
                         // Удаление пищи
@@ -100,9 +130,14 @@ public class Simulation extends Application {
                 newFood.setColor(Color.BLACK);  // Устанавливаем цвет пищи черным
                 foods.add(newFood);
                 root.getChildren().add(newFood);
-                iterator.remove();  // Удаляем умершее животное из списка
-                root.getChildren().remove(animal);
+                animalsToRemove.add(animal);  // Отмечаем животное для удаления
             }
+        }
+
+        // Удаляем отмеченные для удаления животные
+        for (Animal animal : animalsToRemove) {
+            animals.remove(animal);
+            root.getChildren().remove(animal);
         }
 
         // Добавление новых животных после итерации
@@ -122,13 +157,16 @@ public class Simulation extends Application {
                 }
             }
         }
-
-        // Спауним новую пищу, если текущая закончилась
-        if (foods.isEmpty()) {
-            spawnFood(20);  // Количество единиц пищи для спауна можно изменить при необходимости
-        }
     }
 
+    public void removeFood(Food food) {
+        foods.remove(food);
+        root.getChildren().remove(food);
+    }
+
+    public List<Food> getFood() {
+        return foods;
+    }
     public void addAnimal(Animal animal) {
         // Смещение по осям x и y для нового животного
         double offsetX = random.nextDouble() * 40 - 20; // случайное смещение от -20 до 20 по оси x
@@ -152,4 +190,5 @@ public class Simulation extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }
