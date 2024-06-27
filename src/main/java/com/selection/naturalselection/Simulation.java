@@ -7,10 +7,8 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -27,22 +25,27 @@ public class Simulation extends Application {
     private List<Food> foods = new ArrayList<>();
     private List<Animal> newAnimals = new ArrayList<>();
     private Random random = new Random();
-    private Pane root = new Pane();
+    private Pane simulationPane = new Pane();
+    private StatisticPane statisticPane = new StatisticPane();
 
-    private static final double SCREEN_WIDTH = 800;
-    private static final double SCREEN_HEIGHT = 600;
+    private static final double SIMULATION_WIDTH = 800;
+    private static final double SIMULATION_HEIGHT = 600;
     private static final double BORDER_MARGIN = 50; // Маржа от границы экрана, внутри которой еда не будет спавниться
+    private static final double STATISTIC_PANE_WIDTH = 200; // Ширина панели статистики
 
     @Override
     public void start(Stage primaryStage) {
         // Установка фото-фона
         ImageView background = createBackground("C:\\Users\\Lenovo\\IdeaProjects\\NaturalSelection\\NaturalSelection\\src\\main\\resources\\com\\selection\\naturalselection\\fon.png");
-        root.getChildren().add(background);
+        simulationPane.getChildren().add(background);
 
         initializeAnimals(10);  // Инициализация 10 животных
         spawnFood(20);  // Спаун 20 единиц пищи
 
-        Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
+        HBox root = new HBox();
+        root.getChildren().addAll(simulationPane, statisticPane);
+
+        Scene scene = new Scene(root, SIMULATION_WIDTH + STATISTIC_PANE_WIDTH, SIMULATION_HEIGHT);
         primaryStage.setTitle("Natural Selection Simulation");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -64,27 +67,27 @@ public class Simulation extends Application {
     private ImageView createBackground(String path) {
         Image image = new Image(new File(path).toURI().toString());
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(SCREEN_WIDTH);
-        imageView.setFitHeight(SCREEN_HEIGHT);
+        imageView.setFitWidth(SIMULATION_WIDTH);
+        imageView.setFitHeight(SIMULATION_HEIGHT);
         imageView.setPreserveRatio(false);
         return imageView;
     }
 
     private void initializeAnimals(int count) {
         for (int i = 0; i < count; i++) {
-            Animal animal = new Animal(random.nextDouble() * SCREEN_WIDTH, random.nextDouble() * SCREEN_HEIGHT, 20, this);
+            Animal animal = new Animal(random.nextDouble() * SIMULATION_WIDTH, random.nextDouble() * SIMULATION_HEIGHT, 20, this);
             animals.add(animal);
-            root.getChildren().add(animal);
+            simulationPane.getChildren().add(animal);
         }
     }
 
     private void spawnFood(int count) {
         for (int i = 0; i < count; i++) {
-            double x = BORDER_MARGIN + random.nextDouble() * (SCREEN_WIDTH - 2 * BORDER_MARGIN);
-            double y = BORDER_MARGIN + random.nextDouble() * (SCREEN_HEIGHT - 2 * BORDER_MARGIN);
+            double x = BORDER_MARGIN + random.nextDouble() * (SIMULATION_WIDTH - 2 * BORDER_MARGIN);
+            double y = BORDER_MARGIN + random.nextDouble() * (SIMULATION_HEIGHT - 2 * BORDER_MARGIN);
             Food food = new Food(x, y);
             foods.add(food);
-            root.getChildren().add(food);
+            simulationPane.getChildren().add(food);
         }
     }
 
@@ -93,6 +96,8 @@ public class Simulation extends Application {
         List<Animal> animalsToAdd = new ArrayList<>();
 
         Iterator<Animal> iterator = animals.iterator();
+        int energyDepletionDeaths = 0;
+        int predationDeaths = 0;
         while (iterator.hasNext()) {
             Animal animal = iterator.next();
             if (animal.getEnergy() > 0) {
@@ -116,7 +121,7 @@ public class Simulation extends Application {
 
                         // Удаление пищи
                         foods.remove(closestFood);
-                        root.getChildren().remove(closestFood);
+                        simulationPane.getChildren().remove(closestFood);
                     } else {
                         animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
                     }
@@ -129,21 +134,22 @@ public class Simulation extends Application {
                 Food newFood = new Food(animal.getX(), animal.getY());
                 newFood.setColor(Color.BLACK);  // Устанавливаем цвет пищи черным
                 foods.add(newFood);
-                root.getChildren().add(newFood);
+                simulationPane.getChildren().add(newFood);
                 animalsToRemove.add(animal);  // Отмечаем животное для удаления
+                energyDepletionDeaths++; // Увеличиваем счетчик смертей от недостатка энергии
             }
         }
 
         // Удаляем отмеченные для удаления животные
         for (Animal animal : animalsToRemove) {
             animals.remove(animal);
-            root.getChildren().remove(animal);
+            simulationPane.getChildren().remove(animal);
         }
 
         // Добавление новых животных после итерации
         if (!newAnimals.isEmpty()) {
             animals.addAll(newAnimals);
-            root.getChildren().addAll(newAnimals);
+            simulationPane.getChildren().addAll(newAnimals);
             newAnimals.clear();
         }
 
@@ -154,14 +160,21 @@ public class Simulation extends Application {
                 Animal animal2 = animals.get(j);
                 if (animal1.isColliding(animal2)) {
                     animal1.resolveCollision(animal2);
+                    if (animal1.getEnergy() <= 0 || animal2.getEnergy() <= 0) {
+                        predationDeaths++; // Увеличиваем счетчик смертей от хищничества
+                    }
                 }
             }
         }
+
+        // Обновляем статистику
+        statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
+        statisticPane.updatePredationDeaths(predationDeaths);
     }
 
     public void removeFood(Food food) {
         foods.remove(food);
-        root.getChildren().remove(food);
+        simulationPane.getChildren().remove(food);
     }
 
     public List<Food> getFood() {
@@ -180,7 +193,7 @@ public class Simulation extends Application {
 
     public void removeAnimal(Animal animal) {
         animals.remove(animal);
-        root.getChildren().remove(animal);
+        simulationPane.getChildren().remove(animal);
     }
 
     public List<Animal> getAnimals() {
@@ -190,5 +203,4 @@ public class Simulation extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }

@@ -21,7 +21,8 @@ public class Animal extends ImageView {
     private static final Random random = new Random();
     private int foodCount = 0;
     private Simulation simulation;
-
+    public int  energydeadcount=0;
+    public int  predatordeadcount=0;
     private double moveDirectionX;
     private double moveDirectionY;
     private int moveTicks = 0;
@@ -171,6 +172,19 @@ public class Animal extends ImageView {
         }
     }
 
+    public void moveAwayFrom(Animal threat) {
+        double dx = this.getX() - threat.getX();
+        double dy = this.getY() - threat.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 1) {
+            dx /= distance;
+            dy /= distance;
+            this.setX(this.getX() + dx * getSpeed());
+            this.setY(this.getY() + dy * getSpeed());
+        }
+    }
+
     public void moveRandomly() {
         if (moveTicks <= 0 || isAtEdge()) {
             setRandomDirection();
@@ -183,34 +197,39 @@ public class Animal extends ImageView {
                 resolveCollision(prey);
             }
         } else {
-            Food food = findFood();
-            if (food != null) {
-                moveTowards(food);
-                if (isInContactWithFood(food)) {
-                    setEnergy(getEnergy() + 30); // Животное получает энергию
-                    incrementFoodCount(); // Увеличиваем счетчик пищи
-                    simulation.removeFood(food);
-                } else {
-                    setEnergy(getEnergy() - 0.04); // Животное теряет энергию
-                }
+            Animal threat = findThreat();
+            if (threat != null) {
+                moveAwayFrom(threat);
             } else {
-                double newX = this.getX() + moveDirectionX * getSpeed();
-                double newY = this.getY() + moveDirectionY * getSpeed();
-
-                List<Animal> animals = simulation.getAnimals();
-                for (Animal other : animals) {
-                    if (other != this && isColliding(newX, newY, other)) {
-                        if (this.size > other.size * 1.4) {
-                            continue;
-                        }
-                        setRandomDirection();
-                        return;
+                Food food = findFood();
+                if (food != null) {
+                    moveTowards(food);
+                    if (isInContactWithFood(food)) {
+                        setEnergy(getEnergy() + 30); // Животное получает энергию
+                        incrementFoodCount(); // Увеличиваем счетчик пищи
+                        simulation.removeFood(food);
+                    } else {
+                        setEnergy(getEnergy() - 0.04); // Животное теряет энергию
                     }
-                }
+                } else {
+                    double newX = this.getX() + moveDirectionX * getSpeed();
+                    double newY = this.getY() + moveDirectionY * getSpeed();
 
-                this.setX(newX);
-                this.setY(newY);
-                moveTicks--;
+                    List<Animal> animals = simulation.getAnimals();
+                    for (Animal other : animals) {
+                        if (other != this && isColliding(newX, newY, other)) {
+                            if (this.size > other.size * 1.4) {
+                                continue;
+                            }
+                            setRandomDirection();
+                            return;
+                        }
+                    }
+
+                    this.setX(newX);
+                    this.setY(newY);
+                    moveTicks--;
+                }
             }
         }
     }
@@ -228,6 +247,21 @@ public class Animal extends ImageView {
             }
         }
         return closestPrey;
+    }
+
+    private Animal findThreat() {
+        Animal closestThreat = null;
+        double closestDistance = Double.MAX_VALUE;
+        for (Animal other : simulation.getAnimals()) {
+            if (other != this && other.size > this.size * 1.3) { // Проверка на 30% больше
+                double distance = Math.sqrt(Math.pow(this.getX() - other.getX(), 2) + Math.pow(this.getY() - other.getY(), 2));
+                if (distance < this.interactionRadius && distance < closestDistance) {
+                    closestDistance = distance;
+                    closestThreat = other;
+                }
+            }
+        }
+        return closestThreat;
     }
 
     private Food findFood() {
@@ -306,8 +340,9 @@ public class Animal extends ImageView {
     public void resolveCollision(Animal other) {
         if (this.size > other.size * 1.3) { // Проверка на 30% больше
             // Это животное съедает другое
-            this.setEnergy(this.getEnergy() + other.getEnergy() / 2); // Поглощает половину энергии другого животного
+            this.setEnergy(this.getEnergy() + other.getEnergy() / 5); // Поглощает половину энергии другого животного
             this.incrementFoodCount();
+            predatordeadcount+=1;
             simulation.removeAnimal(other);
         } else {
             // Отталкивание
@@ -327,8 +362,8 @@ public class Animal extends ImageView {
 
     private void reproduce() {
         double newSpeed = this.speed * (0.9 + random.nextDouble() * 0.2); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
-        double newSize = this.size * (0.9 + random.nextDouble() * 0.3); // Новый животное получает размер в диапазоне от 90% до 110% от родительской
-        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.2); // Новый животное получает радиус в диапазоне от 90% до 110% от родительского
+        double newSize = this.size * (0.6 + random.nextDouble() * 0.3); // Новый животное получает размер в диапазоне от 90% до 110% от родительской
+        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.4); // Новый животное получает радиус в диапазоне от 90% до 110% от родительского
 
         Animal newAnimal = new Animal(this.getX(), this.getY(), this.energy / 2, simulation);
         newAnimal.setSpeed(newSpeed);
