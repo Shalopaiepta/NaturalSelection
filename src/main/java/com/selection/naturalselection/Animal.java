@@ -27,6 +27,9 @@ public class Animal extends ImageView {
     private double moveDirectionY;
     private int moveTicks = 0;
 
+    private static final double SIMULATION_WIDTH = 800;  // Ширина симуляции
+    private static final double SIMULATION_HEIGHT = 600; // Высота симуляции
+
     public Animal(double x, double y, double energy, Simulation simulation) {
         super(new Image(Animal.class.getResourceAsStream("/com/selection/naturalselection/spore.png")));
         this.simulation = simulation;
@@ -280,7 +283,7 @@ public class Animal extends ImageView {
     private boolean isAtEdge() {
         double x = this.getX();
         double y = this.getY();
-        return x <= 0 || x >= 800 - size || y <= 0 || y >= 600 - size;
+        return x <= 0 || x >= SIMULATION_WIDTH - size || y <= 0 || y >= SIMULATION_HEIGHT - size;
     }
 
     private void setRandomDirection() {
@@ -300,11 +303,11 @@ public class Animal extends ImageView {
         double y = this.getY();
         double angle = random.nextDouble() * Math.PI;
 
-        if (x <= 0 || x >= 800 - size) {
+        if (x <= 0 || x >= SIMULATION_WIDTH - size) {
             moveDirectionX = -moveDirectionX;
             return Math.atan2(moveDirectionY, moveDirectionX);
         }
-        if (y <= 0 || y >= 600 - size) {
+        if (y <= 0 || y >= SIMULATION_HEIGHT - size) {
             moveDirectionY = -moveDirectionY;
             return Math.atan2(moveDirectionY, moveDirectionX);
         }
@@ -342,7 +345,7 @@ public class Animal extends ImageView {
             // Это животное съедает другое
             this.setEnergy(this.getEnergy() + other.getEnergy() / 5); // Поглощает половину энергии другого животного
             this.incrementFoodCount();
-            predatordeadcount+=1;
+                simulation.predationDeaths++; // Увеличиваем счетчик смертей от хищничества
             simulation.removeAnimal(other);
         } else {
             // Отталкивание
@@ -362,8 +365,8 @@ public class Animal extends ImageView {
 
     private void reproduce() {
         double newSpeed = this.speed * (0.9 + random.nextDouble() * 0.2); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
-        double newSize = this.size * (0.6 + random.nextDouble() * 0.3); // Новый животное получает размер в диапазоне от 90% до 110% от родительской
-        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.4); // Новый животное получает радиус в диапазоне от 90% до 110% от родительского
+        double newSize = this.size * (0.6 + random.nextDouble() * 0.3); // Новый животное получает размер в диапазоне от 60% до 90% от родительской
+        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.4); // Новый животное получает радиус в диапазоне от 90% до 130% от родительского
 
         Animal newAnimal = new Animal(this.getX(), this.getY(), this.energy / 2, simulation);
         newAnimal.setSpeed(newSpeed);

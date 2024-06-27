@@ -90,53 +90,28 @@ public class Simulation extends Application {
             simulationPane.getChildren().add(food);
         }
     }
-
+     int energyDepletionDeaths = 0;
+     int predationDeaths = 0;
     private void updateSimulation() {
+
         List<Animal> animalsToRemove = new ArrayList<>();
         List<Animal> animalsToAdd = new ArrayList<>();
 
-        Iterator<Animal> iterator = animals.iterator();
-        int energyDepletionDeaths = 0;
-        int predationDeaths = 0;
-        while (iterator.hasNext()) {
-            Animal animal = iterator.next();
+        statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
+        statisticPane.updatePredationDeaths(predationDeaths);
+        for (Animal animal : animals) {
             if (animal.getEnergy() > 0) {
-                // Поиск пищи в пределах радиуса взаимодействия
-                Food closestFood = null;
-                double closestDistance = Double.MAX_VALUE;
-                for (Food food : foods) {
-                    double distance = Math.sqrt(Math.pow(animal.getX() - food.getCenterX(), 2) +
-                            Math.pow(animal.getY() - food.getCenterY(), 2));
-                    if (distance < animal.getInteractionRadius() && distance < closestDistance) {
-                        closestDistance = distance;
-                        closestFood = food;
-                    }
-                }
-
-                if (closestFood != null) {
-                    animal.moveTowards(closestFood);
-                    if (animal.isInContactWithFood(closestFood)) {
-                        animal.setEnergy(animal.getEnergy() + 30);  // Животное получает энергию
-                        animal.incrementFoodCount(); // Увеличиваем счетчик пищи
-
-                        // Удаление пищи
-                        foods.remove(closestFood);
-                        simulationPane.getChildren().remove(closestFood);
-                    } else {
-                        animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
-                    }
-                } else {
-                    animal.moveRandomly();
-                    animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
-                }
+                animal.moveRandomly();
+                 animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
             } else {
+                energyDepletionDeaths++; // Увеличиваем счетчик смертей от недостатка энергии
                 // Животное умирает и превращается в единицу пищи
                 Food newFood = new Food(animal.getX(), animal.getY());
                 newFood.setColor(Color.BLACK);  // Устанавливаем цвет пищи черным
                 foods.add(newFood);
                 simulationPane.getChildren().add(newFood);
                 animalsToRemove.add(animal);  // Отмечаем животное для удаления
-                energyDepletionDeaths++; // Увеличиваем счетчик смертей от недостатка энергии
+
             }
         }
 
@@ -160,16 +135,15 @@ public class Simulation extends Application {
                 Animal animal2 = animals.get(j);
                 if (animal1.isColliding(animal2)) {
                     animal1.resolveCollision(animal2);
-                    if (animal1.getEnergy() <= 0 || animal2.getEnergy() <= 0) {
-                        predationDeaths++; // Увеличиваем счетчик смертей от хищничества
-                    }
+
+
+
                 }
             }
         }
 
         // Обновляем статистику
-        statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
-        statisticPane.updatePredationDeaths(predationDeaths);
+
     }
 
     public void removeFood(Food food) {
@@ -180,6 +154,7 @@ public class Simulation extends Application {
     public List<Food> getFood() {
         return foods;
     }
+
     public void addAnimal(Animal animal) {
         // Смещение по осям x и y для нового животного
         double offsetX = random.nextDouble() * 40 - 20; // случайное смещение от -20 до 20 по оси x
