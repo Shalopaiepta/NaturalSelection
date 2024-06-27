@@ -15,7 +15,6 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -32,6 +31,7 @@ public class Simulation extends Application {
     private static final double SIMULATION_HEIGHT = 600;
     private static final double BORDER_MARGIN = 50; // Маржа от границы экрана, внутри которой еда не будет спавниться
     private static final double STATISTIC_PANE_WIDTH = 200; // Ширина панели статистики
+    private static final double ANIMAL_SPAWN_MARGIN = STATISTIC_PANE_WIDTH + BORDER_MARGIN; // Маржа для спавна животных
 
     @Override
     public void start(Stage primaryStage) {
@@ -75,7 +75,9 @@ public class Simulation extends Application {
 
     private void initializeAnimals(int count) {
         for (int i = 0; i < count; i++) {
-            Animal animal = new Animal(random.nextDouble() * SIMULATION_WIDTH, random.nextDouble() * SIMULATION_HEIGHT, 20, this);
+            double x = BORDER_MARGIN + random.nextDouble() * (SIMULATION_WIDTH - ANIMAL_SPAWN_MARGIN);
+            double y = BORDER_MARGIN + random.nextDouble() * (SIMULATION_HEIGHT - 2 * BORDER_MARGIN);
+            Animal animal = new Animal(x, y, 20, this);
             animals.add(animal);
             simulationPane.getChildren().add(animal);
         }
@@ -90,19 +92,18 @@ public class Simulation extends Application {
             simulationPane.getChildren().add(food);
         }
     }
-     int energyDepletionDeaths = 0;
-     int predationDeaths = 0;
+
+    public int energyDepletionDeaths = 0;
+    public int predationDeaths = 0;
+
     private void updateSimulation() {
-
         List<Animal> animalsToRemove = new ArrayList<>();
-        List<Animal> animalsToAdd = new ArrayList<>();
-
         statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
         statisticPane.updatePredationDeaths(predationDeaths);
         for (Animal animal : animals) {
             if (animal.getEnergy() > 0) {
                 animal.moveRandomly();
-                 animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
+                animal.setEnergy(animal.getEnergy() - 0.04);  // Животное теряет энергию
             } else {
                 energyDepletionDeaths++; // Увеличиваем счетчик смертей от недостатка энергии
                 // Животное умирает и превращается в единицу пищи
@@ -111,7 +112,6 @@ public class Simulation extends Application {
                 foods.add(newFood);
                 simulationPane.getChildren().add(newFood);
                 animalsToRemove.add(animal);  // Отмечаем животное для удаления
-
             }
         }
 
@@ -135,14 +135,12 @@ public class Simulation extends Application {
                 Animal animal2 = animals.get(j);
                 if (animal1.isColliding(animal2)) {
                     animal1.resolveCollision(animal2);
-
-
-
                 }
             }
         }
 
-        // Обновляем статистику
+
+
 
     }
 
@@ -160,8 +158,24 @@ public class Simulation extends Application {
         double offsetX = random.nextDouble() * 40 - 20; // случайное смещение от -20 до 20 по оси x
         double offsetY = random.nextDouble() * 40 - 20; // случайное смещение от -20 до 20 по оси y
 
-        animal.setX(animal.getX() + offsetX);
-        animal.setY(animal.getY() + offsetY);
+        double newX = animal.getX() + offsetX;
+        double newY = animal.getY() + offsetY;
+
+        // Проверка на границы спавна животных
+        if (newX < BORDER_MARGIN) {
+            newX = BORDER_MARGIN;
+        } else if (newX > SIMULATION_WIDTH - ANIMAL_SPAWN_MARGIN) {
+            newX = SIMULATION_WIDTH - ANIMAL_SPAWN_MARGIN;
+        }
+
+        if (newY < BORDER_MARGIN) {
+            newY = BORDER_MARGIN;
+        } else if (newY > SIMULATION_HEIGHT - BORDER_MARGIN) {
+            newY = SIMULATION_HEIGHT - BORDER_MARGIN;
+        }
+
+        animal.setX(newX);
+        animal.setY(newY);
 
         newAnimals.add(animal);
     }
