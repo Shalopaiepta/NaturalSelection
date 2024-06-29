@@ -157,8 +157,20 @@ public class Animal extends ImageView {
         if (distance > 1) {
             dx /= distance;
             dy /= distance;
-            this.setX(this.getX() + dx * getSpeed());
-            this.setY(this.getY() + dy * getSpeed());
+            double newX = this.getX() + dx * getSpeed();
+            double newY = this.getY() + dy * getSpeed();
+
+            if (newX >= 0 && newX <= SIMULATION_WIDTH - size) {
+                this.setX(newX);
+            }
+            if (newY >= 0 && newY <= SIMULATION_HEIGHT - size) {
+                this.setY(newY);
+            }
+
+            // Correct direction if the animal hits the boundary
+            if (isAtEdge()) {
+                setRandomDirection();
+            }
         }
     }
 
@@ -170,8 +182,20 @@ public class Animal extends ImageView {
         if (distance > 1) {
             dx /= distance;
             dy /= distance;
-            this.setX(this.getX() + dx * getSpeed());
-            this.setY(this.getY() + dy * getSpeed());
+            double newX = this.getX() + dx * getSpeed();
+            double newY = this.getY() + dy * getSpeed();
+
+            if (newX >= 0 && newX <= SIMULATION_WIDTH - size) {
+                this.setX(newX);
+            }
+            if (newY >= 0 && newY <= SIMULATION_HEIGHT - size) {
+                this.setY(newY);
+            }
+
+            // Correct direction if the animal hits the boundary
+            if (isAtEdge()) {
+                setRandomDirection();
+            }
         }
     }
 
@@ -183,10 +207,23 @@ public class Animal extends ImageView {
         if (distance > 1) {
             dx /= distance;
             dy /= distance;
-            this.setX(this.getX() + dx * getSpeed());
-            this.setY(this.getY() + dy * getSpeed());
+            double newX = this.getX() + dx * getSpeed();
+            double newY = this.getY() + dy * getSpeed();
+
+            if (newX >= 0 && newX <= SIMULATION_WIDTH - size) {
+                this.setX(newX);
+            }
+            if (newY >= 0 && newY <= SIMULATION_HEIGHT - size) {
+                this.setY(newY);
+            }
+
+            // Correct direction if the animal hits the boundary
+            if (isAtEdge()) {
+                setRandomDirection();
+            }
         }
     }
+
 
     public void moveRandomly() {
         if (moveTicks <= 0 || isAtEdge()) {
@@ -218,6 +255,14 @@ public class Animal extends ImageView {
                     double newX = this.getX() + moveDirectionX * getSpeed();
                     double newY = this.getY() + moveDirectionY * getSpeed();
 
+                    // Проверка, чтобы не выходить за край SimulationPane
+                    if (newX >= 0 && newX <= SIMULATION_WIDTH - size) {
+                        this.setX(newX);
+                    }
+                    if (newY >= 0 && newY <= SIMULATION_HEIGHT - size) {
+                        this.setY(newY);
+                    }
+
                     List<Animal> animals = simulation.getAnimals();
                     for (Animal other : animals) {
                         if (other != this && isColliding(newX, newY, other)) {
@@ -229,8 +274,6 @@ public class Animal extends ImageView {
                         }
                     }
 
-                    this.setX(newX);
-                    this.setY(newY);
                     moveTicks--;
                 }
             }
@@ -298,6 +341,7 @@ public class Animal extends ImageView {
         moveTicks = 100 + random.nextInt(100);
     }
 
+
     private double calculateBounceAngle() {
         double x = this.getX();
         double y = this.getY();
@@ -345,7 +389,7 @@ public class Animal extends ImageView {
             // Это животное съедает другое
             this.setEnergy(this.getEnergy() + other.getEnergy() / 5); // Поглощает половину энергии другого животного
             this.incrementFoodCount();
-                simulation.predationDeaths++; // Увеличиваем счетчик смертей от хищничества
+            simulation.predationDeaths++; // Увеличиваем счетчик смертей от хищничества
             simulation.removeAnimal(other);
         } else {
             // Отталкивание
@@ -355,13 +399,20 @@ public class Animal extends ImageView {
             if (distance > 0) {
                 dx /= distance;
                 dy /= distance;
-                this.setX(this.getX() - dx * this.getSpeed());
-                this.setY(this.getY() - dy * this.getSpeed());
-                other.setX(other.getX() + dx * other.getSpeed());
-                other.setY(other.getY() + dy * other.getSpeed());
+
+                double newThisX = this.getX() - dx * this.getSpeed();
+                double newThisY = this.getY() - dy * this.getSpeed();
+                double newOtherX = other.getX() + dx * other.getSpeed();
+                double newOtherY = other.getY() + dy * other.getSpeed();
+
+                this.setX(Math.max(0, Math.min(SIMULATION_WIDTH - size, newThisX)));
+                this.setY(Math.max(0, Math.min(SIMULATION_HEIGHT - size, newThisY)));
+                other.setX(Math.max(0, Math.min(SIMULATION_WIDTH - size, newOtherX)));
+                other.setY(Math.max(0, Math.min(SIMULATION_HEIGHT - size, newOtherY)));
             }
         }
     }
+
 
     private void reproduce() {
         double newSpeed = this.speed * (0.9 + random.nextDouble() * 0.2); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской

@@ -95,11 +95,14 @@ public class Simulation extends Application {
 
     public int energyDepletionDeaths = 0;
     public int predationDeaths = 0;
-
+    public int newanimals = 0;
     private void updateSimulation() {
+
         List<Animal> animalsToRemove = new ArrayList<>();
         statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
         statisticPane.updatePredationDeaths(predationDeaths);
+        statisticPane.updateNewAnimals(newanimals);
+        statisticPane.updateCurrentAnimals(animals.size());
         for (Animal animal : animals) {
             if (animal.getEnergy() > 0) {
                 animal.moveRandomly();
@@ -124,6 +127,7 @@ public class Simulation extends Application {
         // Добавление новых животных после итерации
         if (!newAnimals.isEmpty()) {
             animals.addAll(newAnimals);
+            newanimals+=1;
             simulationPane.getChildren().addAll(newAnimals);
             newAnimals.clear();
         }
