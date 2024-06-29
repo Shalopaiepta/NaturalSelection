@@ -415,15 +415,15 @@ public class Animal extends ImageView {
 
 
     private void reproduce() {
-        double newSpeed = this.speed * (0.9 + random.nextDouble() * 0.2); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
-        double newSize = this.size * (0.6 + random.nextDouble() * 0.3); // Новый животное получает размер в диапазоне от 60% до 90% от родительской
+        double newSpeed = this.speed * (0.6 + random.nextDouble() * 0.7); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
+        double newSize = this.size * (0.6 + random.nextDouble() * 0.7); // Новый животное получает размер в диапазоне от 60% до 90% от родительской
         double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.4); // Новый животное получает радиус в диапазоне от 90% до 130% от родительского
 
         Animal newAnimal = new Animal(this.getX(), this.getY(), this.energy / 2, simulation);
         newAnimal.setSpeed(newSpeed);
         newAnimal.setSize(newSize);
         newAnimal.setInteractionRadius(newInteractionRadius);
-        newAnimal.setEffect(this.getEffect()); // Наследование цвета родительского животного
+        
 
         simulation.addAnimal(newAnimal);
     }

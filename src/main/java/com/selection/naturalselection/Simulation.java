@@ -12,7 +12,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,9 @@ public class Simulation extends Application {
         Timeline foodSpawnTimer = new Timeline(new KeyFrame(Duration.seconds(20), event -> spawnFood(15)));
         foodSpawnTimer.setCycleCount(Timeline.INDEFINITE);
         foodSpawnTimer.play();
+
     }
+
 
     private ImageView createBackground(String path) {
         Image image = new Image(new File(path).toURI().toString());
@@ -82,6 +85,71 @@ public class Simulation extends Application {
             simulationPane.getChildren().add(animal);
         }
     }
+    public double getMaxAnimalSize() {
+        if (animals.isEmpty()) return 0;
+        double maxSize = animals.get(0).getSize();
+        for (Animal animal : animals) {
+            if (animal.getSize() > maxSize) {
+                maxSize = animal.getSize();
+            }
+        }
+        return maxSize;
+    }
+
+    public double getMinAnimalSize() {
+        if (animals.isEmpty()) return 0;
+        double minSize = animals.get(0).getSize();
+        for (Animal animal : animals) {
+            if (animal.getSize() < minSize) {
+                minSize = animal.getSize();
+            }
+        }
+        return minSize;
+    }
+
+    public double getMaxAnimalSpeed() {
+        if (animals.isEmpty()) return 0;
+        double maxSpeed = animals.get(0).getSpeed();
+        for (Animal animal : animals) {
+            if (animal.getSpeed() > maxSpeed) {
+                maxSpeed = animal.getSpeed();
+            }
+        }
+        return maxSpeed;
+    }
+
+    public double getMinAnimalSpeed() {
+        if (animals.isEmpty()) return 0;
+        double minSpeed = animals.get(0).getSpeed();
+        for (Animal animal : animals) {
+            if (animal.getSpeed() < minSpeed) {
+                minSpeed = animal.getSpeed();
+            }
+        }
+        return minSpeed;
+    }
+
+    public double getMaxAnimalRadius() {
+        if (animals.isEmpty()) return 0;
+        double maxRadius = animals.get(0).getInteractionRadius();
+        for (Animal animal : animals) {
+            if (animal.getInteractionRadius() > maxRadius) {
+                maxRadius = animal.getInteractionRadius();
+            }
+        }
+        return maxRadius;
+    }
+
+    public double getMinAnimalRadius() {
+        if (animals.isEmpty()) return 0;
+        double minRadius = animals.get(0).getInteractionRadius();
+        for (Animal animal : animals) {
+            if (animal.getInteractionRadius() < minRadius) {
+                minRadius = animal.getInteractionRadius();
+            }
+        }
+        return minRadius;
+    }
 
     private void spawnFood(int count) {
         for (int i = 0; i < count; i++) {
@@ -92,17 +160,35 @@ public class Simulation extends Application {
             simulationPane.getChildren().add(food);
         }
     }
-
+    public double maxSize = 0;
+    public double minSize = 0;
+    public double maxSpeed = 0;
+    public double minSpeed = 0;
+    public double maxRadius = 0;
+    public double minRadius = 0;
     public int energyDepletionDeaths = 0;
     public int predationDeaths = 0;
     public int newanimals = 0;
     private void updateSimulation() {
 
         List<Animal> animalsToRemove = new ArrayList<>();
+        maxSize = getMaxAnimalSize();
+        minSize = getMinAnimalSize();
+        maxSpeed = getMaxAnimalSpeed();
+        minSpeed = getMinAnimalSpeed();
+        maxRadius = getMaxAnimalRadius();
+        minRadius = getMinAnimalRadius();
+
         statisticPane.updateEnergyDepletionDeaths(energyDepletionDeaths);
         statisticPane.updatePredationDeaths(predationDeaths);
         statisticPane.updateNewAnimals(newanimals);
         statisticPane.updateCurrentAnimals(animals.size());
+        statisticPane.updateMaxAnimalSize(maxSize);
+        statisticPane.updateMinAnimalSize(minSize);
+        statisticPane.updateMaxAnimalSpeed(maxSpeed);
+        statisticPane.updateMinAnimalSpeed(minSpeed);
+        statisticPane.updateMaxAnimalRadius(maxRadius);
+        statisticPane.updateMinAnimalRadius(minRadius);
         for (Animal animal : animals) {
             if (animal.getEnergy() > 0) {
                 animal.moveRandomly();
