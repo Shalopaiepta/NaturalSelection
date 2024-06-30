@@ -1,9 +1,12 @@
 package com.selection.naturalselection;
 
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -21,19 +24,25 @@ public class StatisticPane extends VBox {
     private Label minAnimalSpeedLabel;
     private Label maxAnimalRadiusLabel;
     private Label minAnimalRadiusLabel;
+    private Label SimulationEditionLabel;
+    private Label FoodSpawnLabel;
+    private Label TimeSpawnLabel;
+    private TextField foodSpawnTextField;
+    private TextField TimeSpawnTextField;
 
     public StatisticPane() {
+
         titleLabel = new Label("Статистика");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         titleLabel.setTextFill(Color.DARKBLUE);
 
-        energyDepletionDeathsLabel = new Label("Умерли от голода: 0");
+        energyDepletionDeathsLabel = new Label("Умерли от голода: 0   ");
         energyDepletionDeathsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
         predationDeathsLabel = new Label("Съедено хищниками: 0");
         predationDeathsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        birthsLabel = new Label("Родилось клеток: 0");
+        birthsLabel = new Label("Родилось клеток: 0    ");
         birthsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
         currentAnimalsLabel = new Label("Клеток в симуляции: 0");
@@ -56,23 +65,49 @@ public class StatisticPane extends VBox {
 
         minAnimalRadiusLabel = new Label("Минимальный радиус зрения: 0");
         minAnimalRadiusLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        FoodSpawnLabel = new Label("Количество появляющейся еды");
+        FoodSpawnLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 12));
+
+
+
+        foodSpawnTextField = new TextField("15");
+        foodSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        foodSpawnTextField.setPrefWidth(80);
+        foodSpawnTextField.setMaxWidth(80);
+        SimulationEditionLabel = new Label("Настройки симуляции");
+        SimulationEditionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        SimulationEditionLabel.setTextFill(Color.DARKBLUE);
+
+        TimeSpawnLabel = new Label("Кол-во секунд до новой еды");
+        TimeSpawnLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 12));
+        TimeSpawnTextField = new TextField("15");
+        TimeSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        TimeSpawnTextField.setPrefWidth(80);
+        TimeSpawnTextField.setMaxWidth(80);
+        HBox BoxN2 = new HBox(TimeSpawnLabel, TimeSpawnTextField);
+        BoxN2.setSpacing(10);
+        HBox foodSpawnBox = new HBox(FoodSpawnLabel, foodSpawnTextField);
+        foodSpawnBox.setSpacing(10);
+        HBox BoxN3 = new HBox(energyDepletionDeathsLabel, predationDeathsLabel);
+        BoxN3.setSpacing(10);
+        HBox BoxN4 = new HBox(birthsLabel,  currentAnimalsLabel);
+        BoxN3.setSpacing(10);
 
         Line separator1 = createSeparator(Color.DARKBLUE);
         Line separator2 = createSeparator(Color.DARKBLUE);
         Line separator3 = createSeparator(Color.DARKBLUE);
         Line separator4 = createSeparator(Color.DARKBLUE);
         Line separator5 = createSeparator(Color.DARKBLUE);
+        Line separator6 = createSeparator(Color.DARKBLUE);
 
         this.getChildren().addAll(
-                titleLabel, separator1, energyDepletionDeathsLabel, predationDeathsLabel, birthsLabel,
-                currentAnimalsLabel, separator2, maxAnimalSizeLabel, minAnimalSizeLabel, separator3,
-                maxAnimalSpeedLabel, minAnimalSpeedLabel, separator4, maxAnimalRadiusLabel, minAnimalRadiusLabel, separator5
+                titleLabel, separator1, BoxN3, BoxN4, separator2, maxAnimalSizeLabel, minAnimalSizeLabel, separator3,
+                maxAnimalSpeedLabel, minAnimalSpeedLabel, separator4, maxAnimalRadiusLabel, minAnimalRadiusLabel,
+                separator5, SimulationEditionLabel,separator6,foodSpawnBox,BoxN2
         );
 
-        // Устанавливаем серый фон и отступы
         this.setStyle("-fx-background-color: lightgray; -fx-padding: 10; -fx-spacing: 10;");
 
-        // Добавляем тень для более эстетичного вида
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(5.0);
         dropShadow.setOffsetX(3.0);
@@ -83,18 +118,62 @@ public class StatisticPane extends VBox {
     }
 
     private Line createSeparator(Color color) {
-        Line separator = new Line(0, 0, 200, 0); // линия длиной 200 пикселей
+        Line separator = new Line(0, 0, 200, 0);
         separator.setStroke(color);
         separator.setStrokeWidth(2);
         return separator;
     }
+
+    public int getFoodSpawnAmount() {
+        String text = foodSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            foodSpawnTextField.setText("15");
+            return 15; // Если поле пустое, возвращаем значение по умолчанию
+        }
+
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 150) {
+                return amount; // Возвращаем число, если оно меньше 150
+            } else {
+                foodSpawnTextField.setText("15");
+                return 15;
+            }
+        } catch (NumberFormatException e) {
+            foodSpawnTextField.setText("15");
+            return 15; // Если ввод не является числом, возвращаем значение по умолчанию
+        }
+    }
+
+
+    public int getTimeSpawnAmount() {
+        String text = TimeSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            TimeSpawnTextField.setText("15");
+            return 15; // Если поле пустое, возвращаем значение по умолчанию
+        }
+
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 150) {
+                return amount; // Возвращаем число, если оно меньше 150
+            } else {
+                TimeSpawnTextField.setText("15");
+                return 15;
+            }
+        } catch (NumberFormatException e) {
+            TimeSpawnTextField.setText("15");
+            return 15; // Если ввод не является числом, возвращаем значение по умолчанию
+        }
+    }
+
 
     public void updateEnergyDepletionDeaths(int count) {
         energyDepletionDeathsLabel.setText("Умерли от голода: " + count);
     }
 
     public void updatePredationDeaths(int count) {
-        predationDeathsLabel.setText("Съедено хищниками: " + count);
+        predationDeathsLabel.setText("   Съедено хищниками: " + count);
     }
 
     public void updateMaxAnimalSize(double size) {
@@ -126,6 +205,6 @@ public class StatisticPane extends VBox {
     }
 
     public void updateCurrentAnimals(int count) {
-        currentAnimalsLabel.setText("Клеток в симуляции: " + count);
+        currentAnimalsLabel.setText("        Клеток в симуляции: " + count);
     }
 }

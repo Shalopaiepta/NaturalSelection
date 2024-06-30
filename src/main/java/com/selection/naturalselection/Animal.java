@@ -27,8 +27,8 @@ public class Animal extends ImageView {
     private double moveDirectionY;
     private int moveTicks = 0;
 
-    private static final double SIMULATION_WIDTH = 800;  // Ширина симуляции
-    private static final double SIMULATION_HEIGHT = 600; // Высота симуляции
+    private static final double SIMULATION_WIDTH = 690;
+    private static final double SIMULATION_HEIGHT = 690; // Высота симуляции
 
     public Animal(double x, double y, double energy, Simulation simulation) {
         super(new Image(Animal.class.getResourceAsStream("/com/selection/naturalselection/spore.png")));
@@ -415,9 +415,9 @@ public class Animal extends ImageView {
 
 
     private void reproduce() {
-        double newSpeed = this.speed * (0.6 + random.nextDouble() * 0.7); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
+        double newSpeed = this.speed * (0.6 + random.nextDouble() *0.7); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
         double newSize = this.size * (0.6 + random.nextDouble() * 0.7); // Новый животное получает размер в диапазоне от 60% до 90% от родительской
-        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.4); // Новый животное получает радиус в диапазоне от 90% до 130% от родительского
+        double newInteractionRadius = this.interactionRadius * (0.9 + random.nextDouble() * 0.2); // Новый животное получает радиус в диапазоне от 90% до 130% от родительского
 
         Animal newAnimal = new Animal(this.getX(), this.getY(), this.energy / 2, simulation);
         newAnimal.setSpeed(newSpeed);
