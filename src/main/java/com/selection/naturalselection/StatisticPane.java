@@ -2,6 +2,7 @@ package com.selection.naturalselection;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.VBox;
@@ -11,6 +12,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 
 public class StatisticPane extends VBox {
     private Label titleLabel;
@@ -29,15 +31,32 @@ public class StatisticPane extends VBox {
     private Label TimeSpawnLabel;
     private TextField foodSpawnTextField;
     private TextField TimeSpawnTextField;
+    private Label AnimalSpawnLabel;
+    private TextField SpeedSpawnTextField;
+    private TextField SizeSpawnTextField;
+    private TextField VizionSpawnTextField;
+    private Label AnimalSpawnLabelN2;
+    private Slider speedSlider;
+    private Button ResetButton;
+    private Button SpawnAnimalButton;
+    private Simulation simulation;
 
     public StatisticPane() {
-
+        this.simulation = simulation;
         titleLabel = new Label("Статистика");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         titleLabel.setTextFill(Color.DARKBLUE);
 
+
         energyDepletionDeathsLabel = new Label("Умерли от голода: 0   ");
         energyDepletionDeathsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+
+        AnimalSpawnLabel = new Label("Создание животного с параметрами:");
+        AnimalSpawnLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        AnimalSpawnLabel.setTextFill(Color.DARKBLUE);
+
+        AnimalSpawnLabelN2 = new Label("    Размер              Cкорость            Зрение");
+        AnimalSpawnLabelN2.setFont(Font.font("Arial", FontPosture.REGULAR, 12));
 
         predationDeathsLabel = new Label("Съедено хищниками: 0");
         predationDeathsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
@@ -72,8 +91,25 @@ public class StatisticPane extends VBox {
 
         foodSpawnTextField = new TextField("15");
         foodSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+
         foodSpawnTextField.setPrefWidth(80);
         foodSpawnTextField.setMaxWidth(80);
+
+        SpeedSpawnTextField = new TextField("15");
+        SpeedSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        SpeedSpawnTextField.setPrefWidth(80);
+        SpeedSpawnTextField.setMaxWidth(80);
+
+        SizeSpawnTextField = new TextField("15");
+        SizeSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        SizeSpawnTextField.setPrefWidth(80);
+        SizeSpawnTextField.setMaxWidth(80);
+
+        VizionSpawnTextField = new TextField("15");
+        VizionSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
+        VizionSpawnTextField.setPrefWidth(80);
+        VizionSpawnTextField.setMaxWidth(80);
+
         SimulationEditionLabel = new Label("Настройки симуляции");
         SimulationEditionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         SimulationEditionLabel.setTextFill(Color.DARKBLUE);
@@ -84,14 +120,40 @@ public class StatisticPane extends VBox {
         TimeSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
         TimeSpawnTextField.setPrefWidth(80);
         TimeSpawnTextField.setMaxWidth(80);
+        SpawnAnimalButton = new Button("Заспавнить животное");
+        SpawnAnimalButton.setStyle("-fx-background-color: #4CAF50; " +
+                "-fx-text-fill: black; " +
+                "-fx-font-size: 14px; " +
+                "-fx-padding: 10px 20px; " +
+                "-fx-border-color: transparent; " +
+                "-fx-border-radius: 5px;");
+
+        ResetButton = new Button("Рестарт симуляции");
+        ResetButton.setStyle("-fx-background-color: #FF6347; " +
+                "-fx-text-fill: white; " +
+                "-fx-font-size: 14px; " +
+                "-fx-padding: 10px 20px; " +
+                "-fx-border-color: transparent; " +
+                "-fx-border-radius: 5px;");
+        ResetButton.setOnAction(event -> simulation.restartSimulation());
         HBox BoxN2 = new HBox(TimeSpawnLabel, TimeSpawnTextField);
         BoxN2.setSpacing(10);
+
         HBox foodSpawnBox = new HBox(FoodSpawnLabel, foodSpawnTextField);
         foodSpawnBox.setSpacing(10);
+
         HBox BoxN3 = new HBox(energyDepletionDeathsLabel, predationDeathsLabel);
         BoxN3.setSpacing(10);
+
         HBox BoxN4 = new HBox(birthsLabel,  currentAnimalsLabel);
-        BoxN3.setSpacing(10);
+        BoxN4.setSpacing(10);
+
+        HBox BoxN5 = new HBox(AnimalSpawnLabel);
+        BoxN5.setSpacing(10);
+
+        HBox BoxN6 = new HBox(SizeSpawnTextField,SpeedSpawnTextField,  VizionSpawnTextField);
+        BoxN6.setSpacing(10);
+
 
         Line separator1 = createSeparator(Color.DARKBLUE);
         Line separator2 = createSeparator(Color.DARKBLUE);
@@ -99,11 +161,12 @@ public class StatisticPane extends VBox {
         Line separator4 = createSeparator(Color.DARKBLUE);
         Line separator5 = createSeparator(Color.DARKBLUE);
         Line separator6 = createSeparator(Color.DARKBLUE);
+        Line separator7 = createSeparator(Color.DARKBLUE);
 
         this.getChildren().addAll(
                 titleLabel, separator1, BoxN3, BoxN4, separator2, maxAnimalSizeLabel, minAnimalSizeLabel, separator3,
                 maxAnimalSpeedLabel, minAnimalSpeedLabel, separator4, maxAnimalRadiusLabel, minAnimalRadiusLabel,
-                separator5, SimulationEditionLabel,separator6,foodSpawnBox,BoxN2
+                separator5, SimulationEditionLabel,separator6,foodSpawnBox,BoxN2,separator7,BoxN5,BoxN6,AnimalSpawnLabelN2,SpawnAnimalButton,ResetButton
         );
 
         this.setStyle("-fx-background-color: lightgray; -fx-padding: 10; -fx-spacing: 10;");
@@ -124,26 +187,47 @@ public class StatisticPane extends VBox {
         return separator;
     }
 
-    public int getFoodSpawnAmount() {
+    public TextField getFoodSpawnAmount() {
         String text = foodSpawnTextField.getText().trim();
         if (text.isEmpty()) {
             foodSpawnTextField.setText("15");
-            return 15; // Если поле пустое, возвращаем значение по умолчанию
+            return foodSpawnTextField;
         }
-
         try {
             int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
             if (amount < 150) {
-                return amount; // Возвращаем число, если оно меньше 150
+                return foodSpawnTextField;
             } else {
                 foodSpawnTextField.setText("15");
-                return 15;
+                return foodSpawnTextField;
             }
         } catch (NumberFormatException e) {
             foodSpawnTextField.setText("15");
-            return 15; // Если ввод не является числом, возвращаем значение по умолчанию
+            return foodSpawnTextField;
         }
+
     }
+    public TextField getTimeSpawnTextField() {
+        String text = TimeSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            TimeSpawnTextField.setText("15");
+            return TimeSpawnTextField;
+        }
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 150) {
+                return TimeSpawnTextField;
+            } else {
+                TimeSpawnTextField.setText("15");
+                return TimeSpawnTextField;
+            }
+        } catch (NumberFormatException e) {
+            TimeSpawnTextField.setText("15");
+            return TimeSpawnTextField;
+        }
+
+    }
+
 
 
     public int getTimeSpawnAmount() {

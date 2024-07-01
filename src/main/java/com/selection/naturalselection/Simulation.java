@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Simulation extends Application {
-
+    private double speedMultiplier = 1.0;
+    private Timeline foodSpawnTimer; // Таймер для спауна пищи
     private List<Animal> animals = new ArrayList<>();
     private List<Food> foods = new ArrayList<>();
     private List<Animal> newAnimals = new ArrayList<>();
@@ -32,6 +33,21 @@ public class Simulation extends Application {
     private static final double BORDER_MARGIN = 50; // Маржа от границы экрана, внутри которой еда не будет спавниться
     private static final double STATISTIC_PANE_WIDTH = 200; // Ширина панели статистики
     private static final double ANIMAL_SPAWN_MARGIN = STATISTIC_PANE_WIDTH + BORDER_MARGIN; // Маржа для спавна животных
+
+    private void initializeFoodSpawnTimer() {
+        if (foodSpawnTimer != null) {
+            foodSpawnTimer.stop(); // Останавливаем текущий таймер, если он существует
+        }
+
+        int timeSpawnAmount = statisticPane.getTimeSpawnAmount();
+        String text = statisticPane.getFoodSpawnAmount().getText().trim();
+        int FoodSpawnAmount=Integer.parseInt(text);// Получаем текущее значение из текстового поля
+        foodSpawnTimer = new Timeline(
+                new KeyFrame(Duration.seconds(timeSpawnAmount), event -> spawnFood(FoodSpawnAmount, simulationPane))
+        );
+        foodSpawnTimer.setCycleCount(Timeline.INDEFINITE);
+        foodSpawnTimer.play();
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -62,12 +78,11 @@ public class Simulation extends Application {
 
         timer.start();
 
-        // Таймер для спауна пищи
-        Timeline foodSpawnTimer = new Timeline(
-                new KeyFrame(Duration.seconds(statisticPane.getTimeSpawnAmount()), event -> spawnFood(statisticPane.getFoodSpawnAmount(), simulationPane))
-        );
-        foodSpawnTimer.setCycleCount(Timeline.INDEFINITE);
-        foodSpawnTimer.play();
+        // Добавление слушателя на изменения в TimeSpawnTextField
+        statisticPane.getTimeSpawnTextField().textProperty().addListener((observable, oldValue, newValue) -> {
+            initializeFoodSpawnTimer(); // Переинициализация таймера при изменении значения
+        });
+
     }
 
     private ImageView createBackground(String path) {
@@ -283,5 +298,28 @@ public class Simulation extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+    public void restartSimulation() {
+        // Очистка списков животных и пищи
+        animals.clear();
+        foods.clear();
+        newAnimals.clear();
+
+        // Остановка и перезапуск таймера спауна пищи
+        if (foodSpawnTimer != null) {
+            foodSpawnTimer.stop();
+        }
+        initializeFoodSpawnTimer();
+
+        // Инициализация начального состояния симуляции
+        initializeAnimals(10, simulationPane);
+        spawnFood(20, simulationPane);
+
+        // Сброс статистики
+        energyDepletionDeaths = 0;
+        predationDeaths = 0;
+        newanimals = 0;
+
+
     }
 }
