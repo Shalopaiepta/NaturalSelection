@@ -36,8 +36,7 @@ public class StatisticPane extends VBox {
     private TextField SizeSpawnTextField;
     private TextField VizionSpawnTextField;
     private Label AnimalSpawnLabelN2;
-    private Slider speedSlider;
-    private Button ResetButton;
+    public Button PauseButton;
     private Button SpawnAnimalButton;
     private Simulation simulation;
 
@@ -128,14 +127,13 @@ public class StatisticPane extends VBox {
                 "-fx-border-color: transparent; " +
                 "-fx-border-radius: 5px;");
 
-        ResetButton = new Button("Рестарт симуляции");
-        ResetButton.setStyle("-fx-background-color: #FF6347; " +
+        PauseButton = new Button("Пауза симуляции");
+        PauseButton.setStyle("-fx-background-color: #FF6347; " +
                 "-fx-text-fill: white; " +
                 "-fx-font-size: 14px; " +
                 "-fx-padding: 10px 20px; " +
                 "-fx-border-color: transparent; " +
                 "-fx-border-radius: 5px;");
-        ResetButton.setOnAction(event -> simulation.restartSimulation());
         HBox BoxN2 = new HBox(TimeSpawnLabel, TimeSpawnTextField);
         BoxN2.setSpacing(10);
 
@@ -166,7 +164,7 @@ public class StatisticPane extends VBox {
         this.getChildren().addAll(
                 titleLabel, separator1, BoxN3, BoxN4, separator2, maxAnimalSizeLabel, minAnimalSizeLabel, separator3,
                 maxAnimalSpeedLabel, minAnimalSpeedLabel, separator4, maxAnimalRadiusLabel, minAnimalRadiusLabel,
-                separator5, SimulationEditionLabel,separator6,foodSpawnBox,BoxN2,separator7,BoxN5,BoxN6,AnimalSpawnLabelN2,SpawnAnimalButton,ResetButton
+                separator5, SimulationEditionLabel,separator6,foodSpawnBox,BoxN2,separator7,BoxN5,BoxN6,AnimalSpawnLabelN2,SpawnAnimalButton,PauseButton
         );
 
         this.setStyle("-fx-background-color: lightgray; -fx-padding: 10; -fx-spacing: 10;");
@@ -190,7 +188,7 @@ public class StatisticPane extends VBox {
     public TextField getFoodSpawnAmount() {
         String text = foodSpawnTextField.getText().trim();
         if (text.isEmpty()) {
-            foodSpawnTextField.setText("15");
+            foodSpawnTextField.setText("0");
             return foodSpawnTextField;
         }
         try {
@@ -210,7 +208,7 @@ public class StatisticPane extends VBox {
     public TextField getTimeSpawnTextField() {
         String text = TimeSpawnTextField.getText().trim();
         if (text.isEmpty()) {
-            TimeSpawnTextField.setText("15");
+            TimeSpawnTextField.setText("0");
             return TimeSpawnTextField;
         }
         try {
@@ -232,23 +230,9 @@ public class StatisticPane extends VBox {
 
     public int getTimeSpawnAmount() {
         String text = TimeSpawnTextField.getText().trim();
-        if (text.isEmpty()) {
-            TimeSpawnTextField.setText("15");
-            return 15; // Если поле пустое, возвращаем значение по умолчанию
-        }
 
-        try {
             int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
-            if (amount < 150) {
                 return amount; // Возвращаем число, если оно меньше 150
-            } else {
-                TimeSpawnTextField.setText("15");
-                return 15;
-            }
-        } catch (NumberFormatException e) {
-            TimeSpawnTextField.setText("15");
-            return 15; // Если ввод не является числом, возвращаем значение по умолчанию
-        }
     }
 
 

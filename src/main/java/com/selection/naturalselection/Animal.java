@@ -65,8 +65,7 @@ public class Animal extends ImageView {
     }
 
     public double getSpeed() {
-        return speed / Math.sqrt(size / 10);
-    }
+        return speed + (speed / (4 * Math.sqrt(size)));    }
 
     public double getMaxSpeed() {
         return maxspeed;
@@ -143,7 +142,7 @@ public class Animal extends ImageView {
 
     public void incrementFoodCount() {
         foodCount++;
-        if (foodCount >= 2) {
+        if (foodCount > 3) {
             reproduce();
             foodCount = 0;
         }
@@ -387,7 +386,7 @@ public class Animal extends ImageView {
     public void resolveCollision(Animal other) {
         if (this.size > other.size * 1.3) { // Проверка на 30% больше
             // Это животное съедает другое
-            this.setEnergy(this.getEnergy() + other.getEnergy() / 5); // Поглощает половину энергии другого животного
+            this.setEnergy(this.getEnergy() + other.getEnergy() / 10); // о
             this.incrementFoodCount();
             simulation.predationDeaths++; // Увеличиваем счетчик смертей от хищничества
             simulation.removeAnimal(other);
