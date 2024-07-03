@@ -13,7 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
+//Объявление класса и элементов интерфейса
 public class StatisticPane extends VBox {
     private Label titleLabel;
     private Label energyDepletionDeathsLabel;
@@ -32,14 +32,15 @@ public class StatisticPane extends VBox {
     private TextField foodSpawnTextField;
     private TextField TimeSpawnTextField;
     private Label AnimalSpawnLabel;
-    private TextField SpeedSpawnTextField;
-    private TextField SizeSpawnTextField;
-    private TextField VizionSpawnTextField;
+    public TextField SpeedSpawnTextField;
+    public TextField SizeSpawnTextField;
+    public TextField VizionSpawnTextField;
     private Label AnimalSpawnLabelN2;
     public Button PauseButton;
-    private Button SpawnAnimalButton;
+    public Button SpawnAnimalButton;
     private Simulation simulation;
 
+    //Создание элементов интерфейса и части экрана под статистику
     public StatisticPane() {
         this.simulation = simulation;
         titleLabel = new Label("Статистика");
@@ -119,9 +120,9 @@ public class StatisticPane extends VBox {
         TimeSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
         TimeSpawnTextField.setPrefWidth(80);
         TimeSpawnTextField.setMaxWidth(80);
-        SpawnAnimalButton = new Button("Заспавнить животное");
-        SpawnAnimalButton.setStyle("-fx-background-color: #4CAF50; " +
-                "-fx-text-fill: black; " +
+        SpawnAnimalButton = new Button("Создать животное");
+        SpawnAnimalButton.setStyle("-fx-background-color: #0A67A3; " +
+                "-fx-text-fill: white; " +
                 "-fx-font-size: 14px; " +
                 "-fx-padding: 10px 20px; " +
                 "-fx-border-color: transparent; " +
@@ -152,7 +153,6 @@ public class StatisticPane extends VBox {
         HBox BoxN6 = new HBox(SizeSpawnTextField,SpeedSpawnTextField,  VizionSpawnTextField);
         BoxN6.setSpacing(10);
 
-
         Line separator1 = createSeparator(Color.DARKBLUE);
         Line separator2 = createSeparator(Color.DARKBLUE);
         Line separator3 = createSeparator(Color.DARKBLUE);
@@ -177,14 +177,14 @@ public class StatisticPane extends VBox {
 
         this.setEffect(dropShadow);
     }
-
+//Метод создания разделительных линий
     private Line createSeparator(Color color) {
-        Line separator = new Line(0, 0, 200, 0);
+        Line separator = new Line(0, 0, 400, 0);
         separator.setStroke(color);
         separator.setStrokeWidth(2);
         return separator;
     }
-
+//Метод для получения значения количества пищи, которое ввел пользователь
     public TextField getFoodSpawnAmount() {
         String text = foodSpawnTextField.getText().trim();
         if (text.isEmpty()) {
@@ -205,6 +205,52 @@ public class StatisticPane extends VBox {
         }
 
     }
+
+
+
+//метод для получения показателя скорости, которое ввел пользователь
+    public TextField getSpeedSpawnTextField() {
+        String text = SpeedSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            SpeedSpawnTextField.setText("1");
+            return SpeedSpawnTextField;
+        }
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 10) {
+                return SpeedSpawnTextField;
+            } else {
+                SpeedSpawnTextField.setText("1");
+                return SpeedSpawnTextField;
+            }
+        } catch (NumberFormatException e) {
+            SpeedSpawnTextField.setText("1");
+            return SpeedSpawnTextField;
+        }
+
+    }
+    //Метод для получения размера животного, который ввел пользователь
+    public TextField getSizeSpawnTextField() {
+        String text = SizeSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            SizeSpawnTextField.setText("20");
+            return SizeSpawnTextField;
+        }
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 50) {
+                return SizeSpawnTextField;
+            } else {
+                SizeSpawnTextField.setText("20");
+                return SizeSpawnTextField;
+            }
+        } catch (NumberFormatException e) {
+            SizeSpawnTextField.setText("20");
+            return SizeSpawnTextField;
+        }
+
+    }
+    //Метод получения времени до новой пищи, которое ввел пользователь
     public TextField getTimeSpawnTextField() {
         String text = TimeSpawnTextField.getText().trim();
         if (text.isEmpty()) {
@@ -225,6 +271,28 @@ public class StatisticPane extends VBox {
         }
 
     }
+    //Метод получения радиуса зрения, которое ввел пользователь
+    public TextField getVizionSpawnTextField() {
+        String text = VizionSpawnTextField.getText().trim();
+        if (text.isEmpty()) {
+            VizionSpawnTextField.setText("100");
+            return VizionSpawnTextField;
+        }
+        try {
+            int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
+            if (amount < 300) {
+                return VizionSpawnTextField;
+            } else {
+                VizionSpawnTextField.setText("100");
+                return VizionSpawnTextField;
+            }
+        } catch (NumberFormatException e) {
+            VizionSpawnTextField.setText("100");
+            return VizionSpawnTextField;
+        }
+
+    }
+
 
 
 

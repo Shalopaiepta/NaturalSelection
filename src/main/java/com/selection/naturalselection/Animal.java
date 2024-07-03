@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView;
 
 import java.util.List;
 import java.util.Random;
-
+//Объявление класса и переменных
 public class Animal extends ImageView {
     private double energy;
     private double size;
@@ -166,7 +166,7 @@ public class Animal extends ImageView {
                 this.setY(newY);
             }
 
-            // Correct direction if the animal hits the boundary
+
             if (isAtEdge()) {
                 setRandomDirection();
             }
@@ -191,7 +191,7 @@ public class Animal extends ImageView {
                 this.setY(newY);
             }
 
-            // Correct direction if the animal hits the boundary
+
             if (isAtEdge()) {
                 setRandomDirection();
             }
@@ -216,7 +216,7 @@ public class Animal extends ImageView {
                 this.setY(newY);
             }
 
-            // Correct direction if the animal hits the boundary
+            // Изменяем направление если клетка уперлась в границу экрана
             if (isAtEdge()) {
                 setRandomDirection();
             }
@@ -412,7 +412,7 @@ public class Animal extends ImageView {
         }
     }
 
-
+//Метод "рождения" нового животного с новыми характеристиками
     private void reproduce() {
         double newSpeed = this.speed * (0.6 + random.nextDouble() *0.7); // Новый животное получает скорость в диапазоне от 90% до 110% от родительской
         double newSize = this.size * (0.6 + random.nextDouble() * 0.7); // Новый животное получает размер в диапазоне от 60% до 90% от родительской
@@ -426,4 +426,5 @@ public class Animal extends ImageView {
 
         simulation.addAnimal(newAnimal);
     }
+
 }

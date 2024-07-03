@@ -57,7 +57,6 @@ public class Simulation extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-
         // Обработчик изменения времени до новой пищи
         statisticPane.getTimeSpawnTextField().textProperty().addListener((observable, oldValue, newValue) -> {
             if (!isPaused) {
@@ -103,7 +102,29 @@ public class Simulation extends Application {
             });
         }
 
-    }
+        statisticPane.SpawnAnimalButton.setOnAction(event -> {
+            // Генерация случайной позиции для нового животного внутри simulationPane
+            double x = Math.random() * 690;
+            double y = Math.random() * 690;
+
+            // Получение значений параметров из текстовых полей
+            int size = Integer.parseInt(statisticPane.getSizeSpawnTextField().getText().trim());
+            int speed = Integer.parseInt(statisticPane.getSpeedSpawnTextField().getText().trim());
+            int visionRadius = Integer.parseInt(statisticPane.getVizionSpawnTextField().getText().trim());
+
+            // Создание нового животного с этими параметрами
+            Animal newAnimal = new Animal(x, y, 20, this);
+            newAnimal.setSpeed(speed);
+            newAnimal.setSize(size);
+            newAnimal.setInteractionRadius(visionRadius);
+
+            // Добавление нового животного в симуляцию
+            addAnimal(newAnimal);
+        });
+
+
+
+}
     private void initializeFoodSpawnTimer() {
         int timeSpawnAmount = statisticPane.getTimeSpawnAmount();
         if(!isPaused) {
