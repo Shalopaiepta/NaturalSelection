@@ -41,7 +41,7 @@ public class Simulation extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Установка фото-фона
-        ImageView background = createBackground("C:\\Users\\Lenovo\\IdeaProjects\\NaturalSelection\\NaturalSelection\\src\\main\\resources\\com\\selection\\naturalselection\\fon.png");
+        ImageView background = createBackground("C:\\Users\\Lenovo\\IdeaProjects\\NaturalSelection\\src\\main\\resources\\com\\selection\\naturalselection\\fon.png");
         simulationPane.getChildren().add(background);
 
         initializeAnimals(10, simulationPane); // Инициализация 10 животных

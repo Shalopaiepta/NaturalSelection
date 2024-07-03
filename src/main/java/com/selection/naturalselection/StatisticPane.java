@@ -51,7 +51,7 @@ public class StatisticPane extends VBox {
         energyDepletionDeathsLabel = new Label("Умерли от голода: 0   ");
         energyDepletionDeathsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        AnimalSpawnLabel = new Label("Создание животного с параметрами:");
+        AnimalSpawnLabel = new Label("Создание клетки с параметрами:");
         AnimalSpawnLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         AnimalSpawnLabel.setTextFill(Color.DARKBLUE);
 
@@ -67,16 +67,16 @@ public class StatisticPane extends VBox {
         currentAnimalsLabel = new Label("Клеток в симуляции: 0");
         currentAnimalsLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        maxAnimalSizeLabel = new Label("Максимальный размер животного: 0");
+        maxAnimalSizeLabel = new Label("Максимальный размер клетки: 0");
         maxAnimalSizeLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        minAnimalSizeLabel = new Label("Минимальный размер животного: 0");
+        minAnimalSizeLabel = new Label("Минимальный размер клетки: 0");
         minAnimalSizeLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        maxAnimalSpeedLabel = new Label("Максимальная скорость животного: 0");
+        maxAnimalSpeedLabel = new Label("Максимальная скорость клетки: 0");
         maxAnimalSpeedLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
-        minAnimalSpeedLabel = new Label("Минимальная скорость животного: 0");
+        minAnimalSpeedLabel = new Label("Минимальная скорость клетки: 0");
         minAnimalSpeedLabel.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
 
         maxAnimalRadiusLabel = new Label("Максимальный радиус зрения: 0");
@@ -120,7 +120,7 @@ public class StatisticPane extends VBox {
         TimeSpawnTextField.setFont(Font.font("Arial", FontPosture.REGULAR, 14));
         TimeSpawnTextField.setPrefWidth(80);
         TimeSpawnTextField.setMaxWidth(80);
-        SpawnAnimalButton = new Button("Создать животное");
+        SpawnAnimalButton = new Button("Создать клетку");
         SpawnAnimalButton.setStyle("-fx-background-color: #0A67A3; " +
                 "-fx-text-fill: white; " +
                 "-fx-font-size: 14px; " +
@@ -217,7 +217,7 @@ public class StatisticPane extends VBox {
         }
         try {
             int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
-            if (amount < 10) {
+            if (amount < 50) {
                 return SpeedSpawnTextField;
             } else {
                 SpeedSpawnTextField.setText("1");
@@ -238,7 +238,7 @@ public class StatisticPane extends VBox {
         }
         try {
             int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
-            if (amount < 50) {
+            if (amount < 200) {
                 return SizeSpawnTextField;
             } else {
                 SizeSpawnTextField.setText("20");
@@ -280,7 +280,7 @@ public class StatisticPane extends VBox {
         }
         try {
             int amount = Integer.parseInt(text); // Пытаемся преобразовать текст в число
-            if (amount < 300) {
+            if (amount < 400) {
                 return VizionSpawnTextField;
             } else {
                 VizionSpawnTextField.setText("100");
@@ -313,19 +313,19 @@ public class StatisticPane extends VBox {
     }
 
     public void updateMaxAnimalSize(double size) {
-        maxAnimalSizeLabel.setText("Максимальный размер животного: " + size);
+        maxAnimalSizeLabel.setText("Максимальный размер клетки: " + size);
     }
 
     public void updateMinAnimalSize(double size) {
-        minAnimalSizeLabel.setText("Минимальный размер животного: " + size);
+        minAnimalSizeLabel.setText("Минимальный размер клетки: " + size);
     }
 
     public void updateMaxAnimalSpeed(double speed) {
-        maxAnimalSpeedLabel.setText("Максимальная скорость животного: " + speed);
+        maxAnimalSpeedLabel.setText("Максимальная скорость клетки: " + speed);
     }
 
     public void updateMinAnimalSpeed(double speed) {
-        minAnimalSpeedLabel.setText("Минимальная скорость животного: " + speed);
+        minAnimalSpeedLabel.setText("Минимальная скорость клетки: " + speed);
     }
 
     public void updateMaxAnimalRadius(double radius) {
@@ -337,7 +337,7 @@ public class StatisticPane extends VBox {
     }
 
     public void updateNewAnimals(int count) {
-        birthsLabel.setText("Родилось клеток: " + count);
+        birthsLabel.setText("Появилось новых клеток: " + count);
     }
 
     public void updateCurrentAnimals(int count) {
